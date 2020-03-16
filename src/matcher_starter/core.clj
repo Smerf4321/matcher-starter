@@ -10,7 +10,6 @@
 
 (use 'clojure.test)
 
-
 (def grid1 '[
            [0 0 0 0 0 0 1 0 0 0]
            [0 0 0 0 0 0 0 0 1 0]
@@ -47,6 +46,10 @@
                     [1 1]
                     ])
 
+(def cardinals '{:north (1 0), :south (-1 0), :east (0 1), :west (0 -1)})
+
+(def d '(north (2 2) (5 5) grid1))
+
 (defn translate-grid
   [grid]
   (loop [grid grid x '0 y '0 translated '[[]]]
@@ -73,28 +76,30 @@
          (is (== (compare (translate-grid grid2) grid-result2) 0))
          )
 
-(def cardinaldirections
-  ((:north (1 0))
-   (:east (0 1))
-   (:south (-1 0))
-   (:west (0 -1))))
-
-(defn move [direction cords]
-  (list (+ (first direction) (first cord)) (+ (last direction) (last cord))))
 
 (defn turn [direction]
   (cond
-    (= direction :north)
-    :east
-    (= direction :east)
-    :south
-    (= direction :south)
-    :west
-    (= direction :west)
-    :north))
+    (= direction 'north)
+    'east
+    (= direction 'east)
+    'south
+    (= direction 'south)
+    'west
+    (= direction 'west)
+    'north))
 
+(defn move [direction cord]
+  (list (+ (first direction) (first cord)) (+ (last direction) (last cord))))
 
+(defn lmg [details]
+  (let [direction (nth details 0)
+       current (nth details 1)
+       target (nth details 2)
+       grid (nth details 3)]
+    
+    (list (list direction (move (cardinals (keyword direction)) current) target grid) 
+      (list (turn direction) current target grid))
+))
 
-(defn path [direction current target map]
-  
-  )
+(defn path [direction current target grid]
+  (breadth-search (direction current target grid)))

@@ -97,9 +97,9 @@
        target (nth details 2)
        grid (nth details 3)]
     
-    (list (list direction (move (cardinals (keyword direction)) current) target grid) 
-      (list (turn direction) current target grid))
+    (list (list direction (move (cardinals (keyword direction)) current) grid) 
+      (list (turn direction) current grid))
 ))
 
 (defn path [direction current target grid]
-  (breadth-search (direction current target grid)))
+  (breadth-search (direction current grid) (direction target grid) lmg))

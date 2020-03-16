@@ -3,12 +3,17 @@
             [org.clojars.cognesence.matcher.core :refer :all]
             [org.clojars.cognesence.ops-search.core :refer :all]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
 
 (use 'clojure.test)
+
+(def n [0 1])
+(def s [0 -1])
+(def e [1 0])
+(def w [-1 0])
+
+(defn move [dir pos] (map + (dir pos)))
+
+(defn robo [statt end grid])
 
 
 (def grid1 '[

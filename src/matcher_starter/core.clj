@@ -121,7 +121,86 @@
   (path facing (map dec current) (map dec target) (translate-grid grid))
 )
 
+;; Dijkstra
+
+
+(declare  search-dijkstra
+          lmg-dijkstra
+          lmg-dijkstra-movements
+          lmg-dijkstra-rotations)
 
 (defn path-dijkstra [facing current target grid]
-
+  (search-dijkstra facing (map dec current) (map dec target) (translate-grid grid))
 )
+
+(defn search-dijkstra
+  [facing current target grid]
+  ;; transfer the list so that all valid points are extremely
+  ;; high values, and all the impossible are extremely low values
+  (let [start (list facing current grid 0 (mapv #(replace {1 Integer/MIN_VALUE 0 Integer/MAX_VALUE} %) grid))]
+    (breadth-search start #(finish? % target) lmg-dijkstra :debug true)
+  )
+)
+
+(defn lmg-dijkstra [state]
+  (let [facing (nth state 0)
+        current (nth state 1)
+        grid (nth state 2)
+        value (nth state 3)
+        processedGrid (nth state 4)]
+    (concat (lmg-dijkstra-movements facing current grid value processedGrid) (lmg-dijkstra-rotations facing current grid value processedGrid))
+  )
+)
+
+(defn lmg-dijkstra-movements
+  [facing current grid value processedGrid]
+  (cond
+    (true? (move-valid? (move-add (cardinals facing) current 3) (cardinals facing) grid 3))
+      (list
+        (list facing (move-add (cardinals facing) current 3) grid (+ value 1) (assoc processedGrid (nth (move-add (cardinals facing) current 3) 1) (assoc (nth processedGrid (nth (move-add (cardinals facing) current 3) 1)) (nth (move-add (cardinals facing) current 3) 0) value)))
+        (list facing (move-add (cardinals facing) current 2) grid (+ value 1) (assoc processedGrid (nth (move-add (cardinals facing) current 2) 1) (assoc (nth processedGrid (nth (move-add (cardinals facing) current 2) 1)) (nth (move-add (cardinals facing) current 2) 0) value)))
+        (list facing (move-add (cardinals facing) current 1) grid (+ value 1) (assoc processedGrid (nth (move-add (cardinals facing) current 1) 1) (assoc (nth processedGrid (nth (move-add (cardinals facing) current 1) 1)) (nth (move-add (cardinals facing) current 1) 0) value)))
+      )
+    (true? (move-valid? (move-add (cardinals facing) current 2) (cardinals facing) grid 2))
+      (list
+        (list facing (move-add (cardinals facing) current 2) grid (+ value 1) (assoc processedGrid (nth (move-add (cardinals facing) current 2) 1) (assoc (nth processedGrid (nth (move-add (cardinals facing) current 2) 1)) (nth (move-add (cardinals facing) current 2) 0) value)))
+        (list facing (move-add (cardinals facing) current 1) grid (+ value 1) (assoc processedGrid (nth (move-add (cardinals facing) current 1) 1) (assoc (nth processedGrid (nth (move-add (cardinals facing) current 1) 1)) (nth (move-add (cardinals facing) current 1) 0) value)))
+      )
+    (true? (move-valid? (move-add (cardinals facing) current 1) (cardinals facing) grid 1))
+      (list
+        (list facing (move-add (cardinals facing) current 1) grid (+ value 1) (assoc processedGrid (nth (move-add (cardinals facing) current 1) 1) (assoc (nth processedGrid (nth (move-add (cardinals facing) current 1) 1)) (nth (move-add (cardinals facing) current 1) 0) value)))
+      )
+  )
+)
+
+(defn lmg-dijkstra-rotations
+  [facing current grid value processedGrid]
+  (cond
+    (= facing :north)
+      (list
+        (list :east current grid (+ value 1) processedGrid)
+        (list :south current grid (+ value 1) processedGrid)
+        (list :west current grid (+ value 1) processedGrid)
+      )
+    (= facing :east)
+      (list
+        (list :north current grid (+ value 1) processedGrid)
+        (list :south current grid (+ value 1) processedGrid)
+        (list :west current grid (+ value 1) processedGrid)
+      )
+    (= facing :south)
+      (list
+        (list :north current grid (+ value 1) processedGrid)
+        (list :east current grid (+ value 1) processedGrid)
+        (list :west current grid (+ value 1) processedGrid)
+      )
+    (= facing :west)
+      (list
+        (list :north current grid (+ value 1) processedGrid)
+        (list :east current grid (+ value 1) processedGrid)
+        (list :south current grid (+ value 1) processedGrid)
+      )
+  )
+)
+
+(defn move-dijkstra [direction cord multiplier grid])

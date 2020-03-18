@@ -25,22 +25,27 @@
 
 (def testgrid '[[0 0 0] [0 0 0] [0 0 0]])
 
+;; this function translates the grid which was passed by user to a grid which represents locations where robot can be
+;; and not. Essentially this function scales the map so the robot only is taking a single spot rather than 4.
+;; NOTE: the function was only tested with 2D Vectors. There is no guarantee it will work for other list likes.
+;; @arg grid a 2 dimentional vector list which represents the world.
+;; @return translated grid which represents locations at which robot can be and not be.
 (defn translate-grid
   [grid]
   (loop [grid grid x '0 y '0 translated '[[]]]
     (cond
-      (== y (- (count grid) 1))
+      (== y (- (count grid) 1))                       ;; there is no more rows to process
       (pop translated)
-      (== x (- (count (nth grid y)) 1))
-      (recur grid 0 (+ y 1) (conj translated '[]))
-      (and
+      (== x (- (count (nth grid y)) 1))               ;; This row has finished being processed
+      (recur grid 0 (+ y 1) (conj translated '[]))    ;; Add space for next row and repeat
+      (and                                            ;; Check if all 4 places allow the robot to be in them
         (== (nth (nth grid y) x) 0)
         (== (nth (nth grid y) (+ x 1)) 0)
         (== (nth (nth grid (+ y 1)) x) 0)
         (== (nth (nth grid (+ y 1)) (+ x 1)) 0))
-      (recur grid (+ x 1) y
+      (recur grid (+ x 1) y                           ;; Go to next column, and add valid position
              (conj (pop translated) (conj (last translated) 0)))
-      :else
+      :else                                           ;; The position is not valid, mark it as such
       (recur grid (+ x 1) y (conj (pop translated) (conj (last translated) 1)))
       )
     )
@@ -114,4 +119,9 @@
 
 (defn path-brute-force [facing current target grid]
   (path facing (map dec current) (map dec target) (translate-grid grid))
+)
+
+
+(defn path-dijkstra [facing current target grid]
+
 )

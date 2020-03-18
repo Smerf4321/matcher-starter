@@ -107,4 +107,4 @@
   [facing current target grid]
    (let [current (list facing current grid)
          target (list facing target grid)]
-     (breadth-search current target lmg)))
+     (- (count (breadth-search current target lmg)) 1)))

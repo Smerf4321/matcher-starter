@@ -105,9 +105,9 @@
 
 (defn path
   [facing current target grid]
-   (let [current (list facing current grid)
-         target (list facing target grid)]
-     (- (count (breadth-search current target lmg)) 1)))
+   (let [start (list facing current grid)
+         finish (list facing target grid)]
+     (- (count (breadth-search start #(finish? % target) lmg)) 1)))
 
 (defn path-brute-force [facing current target grid]
   (path facing (map dec current) (map dec target) (translate-grid grid))

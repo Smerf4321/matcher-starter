@@ -51,36 +51,34 @@
     )
   )
 
+;;defines the for cardinal directions and their vector (in a mathematical sense)
 (def cardinals '{:north (-1 0), :south (1 0), :east (0 1), :west (0 -1)})
 
-(defn turn [direction]
-  (cond
-    (= direction 'north)
-    'east
-    (= direction 'east)
-    'south
-    (= direction 'south)
-    'west
-    (= direction 'west)
-    'north))
-
+;;adds the vector of the direction to the current coordinate of a robot to move it to a new position
 (defn move-add [direction cord multiplier]
   (list (+ (* multiplier (first direction)) (first cord)) (+ (* multiplier (last direction)) (last cord))))
 
+;;checks if a move is valid for all ranges of movement
 (defn long-move-valid [target direction grid multiplier]
   (cond
     (= 1 multiplier)
       (= 0 (nth (nth grid (first target)) (last target)))
     (= 2 multiplier)
         (and
+           ;;checks if a square before target square is also without obstruction
+           ;;then checks the target square
            (= 0 (nth (nth grid (- (first target) (first direction))) (- (last target) (last direction))))
            (= 0 (nth (nth grid (first target)) (last target))))
     (= 3 multiplier)
         (and
+           ;;checks if two squares before target square are also without obstruction
+           ;;then checks the target square
            (= 0 (nth (nth grid (- (first target) (* 2 (first direction)))) (- (last target) (* 2 (last direction)))))
            (= 0 (nth (nth grid (- (first target) (first direction))) (- (last target) (last direction))))
            (= 0 (nth (nth grid (first target)) (last target))))))
 
+;;general check if the target square is not out of boundaries of the map
+;;then runs the check for the range of movement
 (defn move-valid? [target direction grid multiplier]
   (and (<= 0 (first target))
        (<= 0 (last target))
@@ -89,12 +87,18 @@
        (long-move-valid target direction grid multiplier)
        ))
 
+;;general move check
+;;checks if a specified move is valid and then returns the new coordinates of the robot
+;;otherwise returns its current position
 (defn move [direction cord multiplier grid]
   (if (move-valid? (move-add direction cord multiplier) direction grid multiplier)
     (move-add direction cord multiplier)
     cord
   ))
 
+;;legal move generator which lists all 7 possible actions
+;;could be improved by removing moves that end in no change
+;;e.g. moving into a wall or doing 360 degrees turn
 (defn lmg [details]
   (let [facing (nth details 0)
         current (nth details 1)
@@ -108,15 +112,18 @@
                   (list 'west current grid))
     ))
 
+;;function that checks whether the robot reached its target coordinates
 (defn finish? [current target]
   (= (nth current 1) target))
 
+;;wrapper function for path finding
 (defn path
   [facing current target grid]
    (let [start (list facing current grid)
          finish (list facing target grid)]
      (- (count (breadth-search start #(finish? % target) lmg)) 1)))
 
+;;wrapper function for whole brute-force solution
 (defn path-brute-force [facing current target grid]
   (path facing (map dec current) (map dec target) (translate-grid grid))
 )

@@ -62,15 +62,30 @@
 (defn move-add [direction cord multiplier]
   (list (+ (* multiplier (first direction)) (first cord)) (+ (* multiplier (last direction)) (last cord))))
 
-(defn move-valid? [target grid]
+(defn long-move-valid [target direction grid multiplier]
+  (cond
+    (= 1 multiplier)
+      (= 0 (nth (nth grid (first target)) (last target)))
+    (= 2 multiplier)
+        (and
+           (= 0 (nth (nth grid (- (first target) (first direction))) (- (last target) (last direction))))
+           (= 0 (nth (nth grid (first target)) (last target))))
+    (= 3 multiplier)
+        (and
+           (= 0 (nth (nth grid (- (first target) (* 2 (first direction)))) (- (last target) (* 2 (last direction)))))
+           (= 0 (nth (nth grid (- (first target) (first direction))) (- (last target) (last direction))))
+           (= 0 (nth (nth grid (first target)) (last target))))))
+
+(defn move-valid? [target direction grid multiplier]
   (and (<= 0 (first target))
        (<= 0 (last target))
        (< (first target) (count grid))
        (< (last target) (count (nth grid (first target))))
-       (= 0 (nth (nth grid1 (first target)) (last target)))))
+       (long-move-valid target direction grid multiplier)
+       ))
 
 (defn move [direction cord multiplier grid]
-  (if (move-valid? (move-add direction cord multiplier) grid)
+  (if (move-valid? (move-add direction cord multiplier) direction grid multiplier)
     (move-add direction cord multiplier)
     cord
   ))
@@ -89,13 +104,7 @@
     ))
 
 (defn path
-  ([details]
-   (let [current (list (nth details 0) (nth details 1) (nth details 3))
-        target (list (nth details 0) (nth details 2) (nth details 3))]
-     (count (breadth-search current target lmg))))
-
-  ([facing current target grid]
+  [facing current target grid]
    (let [current (list facing current grid)
          target (list facing target grid)]
-     (count (breadth-search current target lmg))
-     )))
+     (breadth-search current target lmg)))

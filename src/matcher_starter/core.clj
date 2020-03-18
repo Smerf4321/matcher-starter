@@ -62,39 +62,40 @@
 (defn move-add [direction cord multiplier]
   (list (+ (* multiplier (first direction)) (first cord)) (+ (* multiplier (last direction)) (last cord))))
 
-(defn move-valid? [target]
+(defn move-valid? [target grid]
   (and (<= 0 (first target))
        (<= 0 (last target))
-       (< (first target) (count grid1))
-       (< (last target) (count (nth grid1 (first target))))
+       (< (first target) (count grid))
+       (< (last target) (count (nth grid (first target))))
        (= 0 (nth (nth grid1 (first target)) (last target)))))
 
-(defn move [direction cord multiplier]
-  (if (move-valid? (move-add direction cord multiplier))
+(defn move [direction cord multiplier grid]
+  (if (move-valid? (move-add direction cord multiplier) grid)
     (move-add direction cord multiplier)
     cord
   ))
 
 (defn lmg [details]
   (let [facing (nth details 0)
-        current (nth details 1)]
-            (list (list facing (move (cardinals (keyword facing)) current 1))
-                  (list facing (move (cardinals (keyword facing)) current 2))
-                  (list facing (move (cardinals (keyword facing)) current 3))
-                  (list 'north current)
-                  (list 'east current)
-                  (list 'south current)
-                  (list 'west current ))
+        current (nth details 1)
+        grid (nth details 2)]
+            (list (list facing (move (cardinals (keyword facing)) current 1 grid) grid)
+                  (list facing (move (cardinals (keyword facing)) current 2 grid) grid)
+                  (list facing (move (cardinals (keyword facing)) current 3 grid) grid)
+                  (list 'north current grid)
+                  (list 'east current grid)
+                  (list 'south current grid)
+                  (list 'west current grid))
     ))
 
 (defn path
   ([details]
-   (let [current (list (nth details 0) (nth details 1))
-        target (list (nth details 0) (nth details 2))]
-    (breadth-search current target lmg)))
+   (let [current (list (nth details 0) (nth details 1) (nth details 3))
+        target (list (nth details 0) (nth details 2) (nth details 3))]
+     (count (breadth-search current target lmg))))
 
-  ([facing current target]
-   (let [current (list facing current)
-         target (list facing target)]
-     (breadth-search current target lmg)
+  ([facing current target grid]
+   (let [current (list facing current grid)
+         target (list facing target grid)]
+     (count (breadth-search current target lmg))
      )))

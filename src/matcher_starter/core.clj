@@ -103,6 +103,9 @@
                   (list 'west current grid))
     ))
 
+(defn finish? [current target]
+  (= (nth current 1) target))
+
 (defn path
   [facing current target grid]
    (let [start (list facing current grid)
